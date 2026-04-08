@@ -1,0 +1,108 @@
+name: pfpa-productivity-env
+version: "1.0.0"
+description: >
+  A real-world personal productivity AI environment where an agent learns to
+  manage context signals (calendar events, emails, Slack messages, file activity)
+  and take the right proactive action at the right time — exactly like the PFPA
+  (Prompt-Free Proactive AI) system. The agent observes a workspace state and
+  must decide which action to take (or not take) in response to incoming signals.
+
+domain: personal-productivity
+tags: [productivity, task-automation, context-aware, proactive-ai, scheduling]
+
+observation_space:
+  type: dict
+  fields:
+    pending_signals:
+      type: list
+      description: List of unprocessed context signals (calendar, email, slack, file, browser)
+    active_predictions:
+      type: list
+      description: Current AI-generated action predictions with confidence scores
+    calendar_events:
+      type: list
+      description: Upcoming calendar events in next 48 hours
+    recent_actions:
+      type: list
+      description: Last 10 executed/dismissed actions
+    workflow_rules:
+      type: list
+      description: Active automation workflow rules
+    current_time:
+      type: string
+      description: ISO 8601 timestamp of simulated current time
+    user_context:
+      type: dict
+      description: User metadata (location, timezone, work hours)
+
+action_space:
+  type: categorical
+  actions:
+    - id: execute_prediction
+      description: Execute a pending AI prediction (schedule meeting, draft email, send message)
+      params: [prediction_id]
+    - id: dismiss_prediction
+      description: Dismiss a prediction as irrelevant
+      params: [prediction_id]
+    - id: create_calendar_event
+      description: Proactively create a calendar event from a signal
+      params: [title, start_time, duration_minutes, attendees]
+    - id: draft_email
+      description: Draft an email response triggered by a signal
+      params: [to, subject, body_outline]
+    - id: send_slack_message
+      description: Send a proactive Slack message
+      params: [channel, message]
+    - id: set_workflow_rule
+      description: Create an automation rule for future signals
+      params: [trigger_type, condition, action_template]
+    - id: snooze_signal
+      description: Snooze a signal to revisit later
+      params: [signal_id, snooze_minutes]
+    - id: noop
+      description: Take no action — observe and wait
+      params: []
+
+tasks:
+  - id: signal_triage_easy
+    name: "Signal Triage — Easy"
+    difficulty: easy
+    description: >
+      Given 5 incoming signals, correctly classify each as urgent/non-urgent
+      and execute only the top 2 high-confidence predictions.
+    max_steps: 10
+    reward_range: [0.0, 1.0]
+
+  - id: workflow_optimization_medium
+    name: "Workflow Optimization — Medium"
+    difficulty: medium
+    description: >
+      A busy work day with 12 signals across email, calendar, and Slack.
+      Create at least one workflow rule, handle conflicting calendar events,
+      and maintain a prediction accuracy above 70%.
+    max_steps: 20
+    reward_range: [0.0, 1.0]
+
+  - id: crisis_management_hard
+    name: "Crisis Management — Hard"
+    difficulty: hard
+    description: >
+      High-volume signal storm: 25+ signals, overlapping meetings, urgent emails,
+      and competing priorities. Agent must triage correctly, avoid false positives,
+      balance automation vs human oversight, and set resilient workflow rules.
+    max_steps: 40
+    reward_range: [0.0, 1.0]
+
+api:
+  base_path: /
+  endpoints:
+    - POST /reset
+    - POST /step
+    - GET /state
+    - GET /tasks
+    - GET /health
+
+environment_variables:
+  - API_BASE_URL
+  - MODEL_NAME
+  - HF_TOKEN
