@@ -224,3 +224,11 @@ _WEB_HTML = _WEB_HTML.replace("TASK_OPTIONS_PLACEHOLDER", _TASK_OPTIONS)
 def web_ui():
     """Plain HTML test UI — no Gradio required."""
     return HTMLResponse(content=_WEB_HTML)
+
+
+def main():
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=7860)
+
+if __name__ == '__main__':
+    main()
